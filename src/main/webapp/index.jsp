@@ -10,6 +10,7 @@
 <body>
 <div class="bgc">
   <div class="container">
+  
     <div class="header">
       <h1><span class="l">L</span>OGIN</h1>
     </div>
@@ -24,6 +25,7 @@
       <b>Don't have account?</b>
       <a href="./register.jsp">Sign up</a>
     </div>
+    <b class="msgtext" style="color: red;">Message</b>
   </div>
 </div>
 </body>

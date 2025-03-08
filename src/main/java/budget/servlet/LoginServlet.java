@@ -26,10 +26,10 @@ public class LoginServlet extends HttpServlet {
             session.setAttribute("user", user);
             
             // Redirect to dashboard or home page
-            response.sendRedirect("welcome.jsp");
+            response.sendRedirect("dashboard");
         } else {
             // Login failed - Redirect back with error message
-            response.sendRedirect("login.jsp?msg=failure");
+            response.sendRedirect("index.jsp?msg=failure");
         }
     }
 }

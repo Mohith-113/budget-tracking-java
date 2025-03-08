@@ -1,0 +1,210 @@
+@charset "UTF-8";
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: monospace !important;
+    background-color: #ccc;
+    display: flex;
+    accent-color: #0063ff;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    width: 250px;
+    background-color: #eee;
+    height: 100vh;
+    padding-top: 20px;
+    position: fixed;
+    left: 0;
+    transition: width 0.3s ease-in-out;
+    overflow: hidden;
+}
+
+.sidebar h2 {
+    text-align: center;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.sidebar ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.sidebar ul li {
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar ul li i {
+    font-size: 18px;
+    margin-right: 7px;
+    transition: margin-right 0.3s ease-in-out;
+}
+
+.sidebar ul li a {
+    text-decoration: none;
+    color: #333;
+    display: block;
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* Sidebar Collapsed */
+.sidebar.collapsed {
+    width: 70px;
+}
+
+.sidebar.collapsed h2,
+.sidebar.collapsed .menu-text {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.sidebar.collapsed ul li{
+	display: block;
+}
+
+.sidebar.collapsed ul li i {
+    margin-right: 0;
+}
+
+.sidebar.collapsed ul li {
+    justify-content: center;
+}
+
+/* Toggle Button */
+.toggle-btn {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* Main Content */
+#main-content {
+    margin-left: 250px;
+    padding: 20px;
+    flex-grow: 1;
+    transition: margin-left 0.3s ease-in-out;
+}
+
+/* Adjust content when sidebar is collapsed */
+#main-content.collapsed {
+    margin-left: 70px;
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    padding: 10px;
+    background-color: #222;
+    color: white;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+/* Container Styling */
+.container {
+    width: 80%;
+    margin: 50px auto;
+    text-align: center;
+}
+
+/* Add Expense Button */
+.add-expense-btn {
+    float: right;
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.add-expense-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Expenses Table */
+.expenses-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.expenses-table th, .expenses-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+.expenses-table th {
+    background-color: #f4f4f4;
+}
+
+.edit-btn, .delete-btn {
+    padding: 5px 10px;
+    margin: 5px;
+    border: none;
+    cursor: pointer;
+}
+
+.edit-btn {
+    background-color: #28a745;
+    color: white;
+}
+
+.delete-btn {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* Modal Styling */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 110%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+    background-color: white;
+    width: 30%;
+    margin: 5% auto;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0px 0px 10px 0px #000;
+}
+
+.close-btn {
+    float: right;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.close-btn:hover {
+    color: red;
+}
+
+.modal-content input,
+.modal-content select,
+.modal-content textarea {
+    width: 100%;  /* Ensures all inputs take full width */
+    max-width: 90%; /* Adjust to prevent overflow */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    display: block;
+    margin: 10px auto; /* Centers the input fields */
+}
