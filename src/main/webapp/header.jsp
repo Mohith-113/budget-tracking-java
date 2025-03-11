@@ -1,4 +1,15 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="budget.schema.User" %>
+<%
+    // Session validation
+    User user = (User) session.getAttribute("user");
+    if (user == null) {
+        response.sendRedirect("index.jsp?msg=unauthorized");
+        return;
+    }
+%>
+
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -17,7 +28,7 @@
     <ul>
         <li><i class="fa-solid fa-house-user"></i> <span class="menu-text"><a href="dashboard">Dashboard</a></span></li>
         <li><i class="fa-solid fa-money-bill-trend-up"></i> <span class="menu-text"><a href="expense">Expenses</a></span></li>
-        <li><i class="fa-solid fa-money-check-dollar"></i> <span class="menu-text"><a href="budget.jsp">Budgets</a></span></li>
+        <li><i class="fa-solid fa-money-check-dollar"></i> <span class="menu-text"><a href="budget">Budgets</a></span></li>
         <li><i class="fa-solid fa-bullseye"></i> <span class="menu-text"><a href="goals.jsp">Goals</a></span></li>
         <li><i class="fa-solid fa-coins"></i> <span class="menu-text"><a href="analytics.jsp">Analytics</a></span></li>
         <li><i class="fa-solid fa-right-from-bracket"></i> <span class="menu-text"><a href="logout.jsp">Logout</a></span></li>

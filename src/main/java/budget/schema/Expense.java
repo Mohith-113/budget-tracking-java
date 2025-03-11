@@ -7,6 +7,7 @@ public class Expense {
     private String category;
     private double amount;
     private String description;
+    private int categoryId;
 
     public Expense() {}
 
@@ -18,7 +19,18 @@ public class Expense {
         this.description = description;
     }
 
-    public int getId() { return id; }
+    
+
+	public Expense( int userId, String date, int categoryId, double amount, String description) {
+		super();
+		this.userId = userId;
+		this.date = date;
+		this.amount = amount;
+		this.description = description;
+		this.categoryId = categoryId;
+	}
+
+	public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
     public int getUserId() { return userId; }

@@ -4,15 +4,70 @@ import budget.db.DBConnection;
 import budget.schema.Expense;
 
 import java.sql.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ExpenseDAO {
+	
+	
+	public double getTotalSpentByUser(int userId, int year, int month) {
+	    String sql = "SELECT SUM(amount) FROM expenses WHERE user_id = ? AND year = ? AND month = ?";
+	    try (Connection conn = DBConnection.getConnection();
+	         PreparedStatement stmt = conn.prepareStatement(sql)) {
+	        stmt.setInt(1, userId);
+	        stmt.setInt(2, year);
+	        stmt.setInt(3, month);
+	        ResultSet rs = stmt.executeQuery();
+	        if (rs.next()) return rs.getDouble(1);
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+	    return 0;
+	}
+
+	public double getTotalSpentByCategory(int userId, int categoryId, int year, int month) {
+	    String sql = "SELECT SUM(amount) FROM expenses WHERE user_id = ? AND category_id = ? AND YEAR(date) = ? AND MONTH(date) = ?";
+	    try (Connection conn = DBConnection.getConnection();
+	         PreparedStatement stmt = conn.prepareStatement(sql)) {
+	        stmt.setInt(1, userId);
+	        stmt.setInt(2, categoryId);
+	        stmt.setInt(3, year);
+	        stmt.setInt(4, month);
+	        ResultSet rs = stmt.executeQuery();
+	        if (rs.next()) return rs.getDouble(1);
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+	    return 0;
+	}
+
+	public double getMonthlyLimit(int userId, int year, int month) {
+	    String sql = "SELECT SUM(monthly_limit) FROM budgets WHERE user_id = ? AND year = ? AND month = ?";
+	    try (Connection conn = DBConnection.getConnection();
+	         PreparedStatement stmt = conn.prepareStatement(sql)) {
+	        stmt.setInt(1, userId);
+	        stmt.setInt(2, year);
+	        stmt.setInt(3, month);
+	        ResultSet rs = stmt.executeQuery();
+	        if (rs.next()) return rs.getDouble(1);
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+	    return Double.MAX_VALUE;
+	}
+
+	public double getCategoryLimit(int userId, int categoryId, int year, int month) {
+	    return getMonthlyLimit(userId, year, month); // Modify if category-specific limits exist
+	}
+
 
     // ✅ Method to get category ID (or insert if not exists)
-    private int getCategoryId(String categoryName, Connection conn) throws SQLException {
+    public int getCategoryId(String categoryName) throws SQLException {
         String checkQuery = "SELECT category_id FROM categories WHERE category_name = ?";
-        try (PreparedStatement checkStmt = conn.prepareStatement(checkQuery)) {
+        try (Connection conn = DBConnection.getConnection();
+        		PreparedStatement checkStmt = conn.prepareStatement(checkQuery)) {
             checkStmt.setString(1, categoryName);
             ResultSet rs = checkStmt.executeQuery();
             if (rs.next()) {
@@ -22,7 +77,8 @@ public class ExpenseDAO {
 
         // If category does not exist, insert it
         String insertQuery = "INSERT INTO categories (category_name) VALUES (?)";
-        try (PreparedStatement insertStmt = conn.prepareStatement(insertQuery, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection conn = DBConnection.getConnection();
+        		PreparedStatement insertStmt = conn.prepareStatement(insertQuery, Statement.RETURN_GENERATED_KEYS)) {
             insertStmt.setString(1, categoryName);
             insertStmt.executeUpdate();
             ResultSet generatedKeys = insertStmt.getGeneratedKeys();
@@ -35,14 +91,18 @@ public class ExpenseDAO {
 
     // ✅ Add expense and also insert into transactions table
     public void addExpense(Expense expense) {
-        String expenseSQL = "INSERT INTO expenses (user_id, date, category_id, amount, description) VALUES (?, ?, ?, ?, ?)";
+        String expenseSQL = "INSERT INTO expenses (user_id, date, category_id, amount, description, month) VALUES (?, ?, ?, ?, ?, ?)";
         String transactionSQL = "INSERT INTO transactions (user_id, expense_id, transaction_type, amount, date) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection()) {
             conn.setAutoCommit(false); // ✅ Start transaction
 
-            int categoryId = getCategoryId(expense.getCategory(), conn); // Get or insert category
+            int categoryId = getCategoryId(expense.getCategory()); // Get or insert category
             int expenseId = -1;
+            
+            LocalDate expenseDate = LocalDate.parse(expense.getDate(), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            int month1 = expenseDate.getMonthValue();
+            int year1 = expenseDate.getYear();
 
             // Insert into expenses table
             try (PreparedStatement expenseStmt = conn.prepareStatement(expenseSQL, Statement.RETURN_GENERATED_KEYS)) {
@@ -51,6 +111,7 @@ public class ExpenseDAO {
                 expenseStmt.setInt(3, categoryId);
                 expenseStmt.setDouble(4, expense.getAmount());
                 expenseStmt.setString(5, expense.getDescription());
+                expenseStmt.setInt(6, month1);
                 expenseStmt.executeUpdate();
 
                 ResultSet rs = expenseStmt.getGeneratedKeys();

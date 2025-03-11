@@ -59,3 +59,25 @@ $(document).ready(function() {
 });
 
 
+// Open Budget Modal
+function openBudgetModal() {
+    document.getElementById("budgetModal").style.display = "block";
+}
+
+// Close Expense Modal
+function closeBudgetModal() {
+    document.getElementById("budgetModal").style.display = "none";
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    let modal = document.getElementById("budgetModal");
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+
+
+
+
+

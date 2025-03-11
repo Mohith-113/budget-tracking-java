@@ -6,24 +6,21 @@
 
 <%@ include file="header.jsp" %>
 
-<%
-    // Session validation
-    User user = (User) session.getAttribute("user");
-    if (user == null) {
-        response.sendRedirect("index.jsp?msg=unauthorized");
-        return;
-    }
-%>
+
 
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <div class="container">
     <h2>Expenses</h2>
+    
+    <input type="text" class="search form-control" placeholder="Pending">
+    
     <button class="add-expense-btn" onclick="openExpenseModal()">+ Add Expense</button>
+    
 
     <!-- Expenses Table -->
-    <table class="expenses-table">
+    <table class="expenses-table" id="userTbl">
         <thead>
             <tr>
                 <th>Date</th>
@@ -33,7 +30,7 @@
                 <th>Action</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody  id="myTable">
             <%
                 ExpenseDAO expenseDAO = new ExpenseDAO();
                 List<Expense> expenseList = expenseDAO.getExpensesByUser(user.getUserId());
@@ -60,10 +57,10 @@
         <span class="close-btn" onclick="closeExpenseModal()">&times;</span>
         <h2>Add Expense</h2>
         <form action="AddExpenseServlet" method="post">
-            <input type="text" name="user_id" value="<%= user.getUserId() %>">
+            <input type="hidden" name="user_id" value="<%= user.getUserId() %>" readonly>
 
             <label for="date">Date:</label>
-            <input type="date" id="date" name="date" required>
+            <input type="date" id="date" name="date" max="<%= java.time.LocalDate.now() %>" value="<%= java.time.LocalDate.now() %>" required onkeydown="return false;">
                         
             <label for="category">Category:</label>
 			<input type="text" id="category" name="category" autocomplete="off" list="categoryList">
