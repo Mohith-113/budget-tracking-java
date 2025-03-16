@@ -1,6 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="java.util.*" %>
 
+<%@ include file="header.jsp" %>
+
 <%
     boolean exceedsMonthly = (boolean) request.getAttribute("exceedsMonthly");
     boolean exceedsCategory = (boolean) request.getAttribute("exceedsCategory");
@@ -8,6 +10,8 @@
     int categoryId = (int) request.getAttribute("categoryId");
     String date = (String) request.getAttribute("date");
     String description = (String) request.getAttribute("description");
+    int month = (int) request.getAttribute("month");
+    int year = (int) request.getAttribute("year");
 
     String message = "";
     if (exceedsMonthly && exceedsCategory) {
@@ -37,6 +41,8 @@
             <input type="hidden" name="amount" value="<%= amount %>">
             <input type="hidden" name="categoryId" value="<%= categoryId %>">
             <input type="hidden" name="date" value="<%= date %>">
+            <input type="hidden" name="year" value="<%= year %>">
+            <input type="hidden" name="month" value="<%= month %>">
             <input type="hidden" name="description" value="<%= description %>">
             <button type="button" onclick="proceedExpense()">Proceed</button>
             <button type="button" onclick="cancelExpense()">Cancel</button>
@@ -47,3 +53,5 @@
 <script>
     document.getElementById("budgetExceededModal").style.display = "block";
 </script>
+
+<%@ include file="footer.jsp" %>

@@ -39,7 +39,7 @@
             <tr>
                 <td><%= exp.getDate() %></td>
                 <td><%= exp.getCategory() %></td>
-                <td>$<%= exp.getAmount() %></td>
+                <td><%= exp.getAmount() %></td>
                 <td><%= exp.getDescription() %></td>
                 <td>
                     <button class="edit-btn">Edit</button>
@@ -63,7 +63,7 @@
             <input type="date" id="date" name="date" max="<%= java.time.LocalDate.now() %>" value="<%= java.time.LocalDate.now() %>" required onkeydown="return false;">
                         
             <label for="category">Category:</label>
-			<input type="text" id="category" name="category" autocomplete="off" list="categoryList">
+			<input type="text" id="category" name="category" autocomplete="off" list="categoryList" required>
 		    <datalist id="categoryList"></datalist>
 
 

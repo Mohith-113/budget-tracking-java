@@ -78,6 +78,41 @@ window.onclick = function(event) {
 }
 
 
+// Open Goal Modal
+    function openGoalModal() {
+        document.getElementById("goalModal").style.display = "block";
+    }
+
+    // Close Goal Modal
+    function closeGoalModal() {
+        document.getElementById("goalModal").style.display = "none";
+    }
+
+    // Open Amount Modal with specific goal details
+    function openAmountModal(goalId, goalName) {
+        document.getElementById("goal_id").value = goalId;
+        document.getElementById("goal_name_display").value = goalName;
+        document.getElementById("amountModal").style.display = "block";
+    }
+
+    // Close Amount Modal
+    function closeAmountModal() {
+        document.getElementById("amountModal").style.display = "none";
+    }
+
+    // Close modals when clicking outside them
+    window.onclick = function(event) {
+        let amountModal = document.getElementById("amountModal");
+        let goalModal = document.getElementById("goalModal");
+        
+        if (event.target == amountModal) {
+            closeAmountModal();
+        }
+        if (event.target == goalModal) {
+            closeGoalModal();
+        }
+    };
+
 
 
 

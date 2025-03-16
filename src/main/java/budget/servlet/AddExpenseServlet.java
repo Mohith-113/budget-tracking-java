@@ -26,30 +26,59 @@ public class AddExpenseServlet extends HttpServlet {
             return;
         }
 
+        String categoryName = request.getParameter("category");
+
+        if (categoryName == null || categoryName.trim().isEmpty()) {
+            System.out.println("[DEBUG] Category is missing!");
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Category cannot be null or empty");
+            return;
+        }
+
+        System.out.println("[DEBUG] Received category: " + categoryName);
+
+
         int userId = user.getUserId();
         String date = request.getParameter("date");
-        String category = request.getParameter("category"); // Category Name
+//        String category = request.getParameter("category"); // Category Name
         double amount = Double.parseDouble(request.getParameter("amount"));
         String description = request.getParameter("description");
         
-        int categoryId = 0;
         ExpenseDAO expenseDAO = new ExpenseDAO();
-		try {
-			categoryId = expenseDAO.getCategoryId(category);
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+        int categoryId = -1;
 
+        
+            System.out.println("[DEBUG] Fetching categoryId for category: " + categoryName);
+            try {
+            	System.out.println("[DEBUG] calling");
+				categoryId = expenseDAO.getCategoryId(categoryName);
+				System.out.println("[DEBUG] ended calling");
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+            System.out.println("[DEBUG] Retrieved categoryId: " + categoryId);
+        
+
+        if (categoryId == -1) {
+            System.out.println("[DEBUG] categoryId is invalid!");
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Invalid category");
+            return;
+        }
+        System.out.println("[DEBUG] Moving to get year and month");
 
         int year = java.time.LocalDate.parse(date).getYear();
         int month = java.time.LocalDate.parse(date).getMonthValue();
+        System.out.println("[DEBUG] Moving to get spents ");
 
         double monthlySpent = expenseDAO.getTotalSpentByUser(userId, year, month);
         double categorySpent = expenseDAO.getTotalSpentByCategory(userId, categoryId, year, month);
+        
+        System.out.println("[DEBUG] Moving to get limits");
 
         double monthlyLimit = expenseDAO.getMonthlyLimit(userId, year, month);
         double categoryLimit = expenseDAO.getCategoryLimit(userId, categoryId, year, month);
+        
+        System.out.println("[DEBUG] Validating spents and limits");
 
         boolean exceedsMonthly = (monthlySpent + amount) > monthlyLimit;
         boolean exceedsCategory = (categorySpent + amount) > categoryLimit;
@@ -61,11 +90,13 @@ public class AddExpenseServlet extends HttpServlet {
             request.setAttribute("categoryId", categoryId);
             request.setAttribute("date", date);
             request.setAttribute("description", description);
+            request.setAttribute("year", year);
+            request.setAttribute("month", month);
 
             request.getRequestDispatcher("budgetExceeded.jsp").forward(request, response);
         } else {
             // Directly insert the expense if no limits are exceeded
-            Expense expense = new Expense(userId, date, categoryId, amount, description);
+            Expense expense = new Expense(userId, date, categoryId, amount, description, year, month);
             expenseDAO.addExpense(expense);
             response.sendRedirect("expense?msg=expense-added");
         }

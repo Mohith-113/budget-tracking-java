@@ -29,7 +29,7 @@
         <li><i class="fa-solid fa-house-user"></i> <span class="menu-text"><a href="dashboard">Dashboard</a></span></li>
         <li><i class="fa-solid fa-money-bill-trend-up"></i> <span class="menu-text"><a href="expense">Expenses</a></span></li>
         <li><i class="fa-solid fa-money-check-dollar"></i> <span class="menu-text"><a href="budget">Budgets</a></span></li>
-        <li><i class="fa-solid fa-bullseye"></i> <span class="menu-text"><a href="goals.jsp">Goals</a></span></li>
+        <li><i class="fa-solid fa-bullseye"></i> <span class="menu-text"><a href="goal">Goals</a></span></li>
         <li><i class="fa-solid fa-coins"></i> <span class="menu-text"><a href="analytics.jsp">Analytics</a></span></li>
         <li><i class="fa-solid fa-right-from-bracket"></i> <span class="menu-text"><a href="logout.jsp">Logout</a></span></li>
     </ul>

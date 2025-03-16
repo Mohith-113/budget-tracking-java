@@ -30,12 +30,14 @@ public class ConfirmExpenseServlet extends HttpServlet {
         int categoryId = Integer.parseInt(request.getParameter("categoryId"));
         double amount = Double.parseDouble(request.getParameter("amount"));
         String description = request.getParameter("description");
+        int year = Integer.parseInt(request.getParameter("year"));
+        int month = Integer.parseInt(request.getParameter("month"));
 
         ExpenseDAO expenseDAO = new ExpenseDAO();
-        Expense expense = new Expense(userId, date, categoryId, amount, description);
+        Expense expense = new Expense(userId, date, categoryId, amount, description, year, month);
 
         expenseDAO.addExpense(expense);
 
-        response.sendRedirect("expense.jsp?msg=expense-added");
+        response.sendRedirect("expense?msg=expense-added");
     }
 }

@@ -28,7 +28,7 @@ public class ExpenseDAO {
 	}
 
 	public double getTotalSpentByCategory(int userId, int categoryId, int year, int month) {
-	    String sql = "SELECT SUM(amount) FROM expenses WHERE user_id = ? AND category_id = ? AND YEAR(date) = ? AND MONTH(date) = ?";
+	    String sql = "SELECT SUM(amount) FROM expenses WHERE user_id = ? AND category_id = ? AND year = ? AND month = ?";
 	    try (Connection conn = DBConnection.getConnection();
 	         PreparedStatement stmt = conn.prepareStatement(sql)) {
 	        stmt.setInt(1, userId);
@@ -59,46 +59,79 @@ public class ExpenseDAO {
 	}
 
 	public double getCategoryLimit(int userId, int categoryId, int year, int month) {
-	    return getMonthlyLimit(userId, year, month); // Modify if category-specific limits exist
+		String sql = "SELECT SUM(monthly_limit) FROM budgets WHERE user_id = ? AND year = ? AND month = ? AND category_id = ?";
+	    try (Connection conn = DBConnection.getConnection();
+	         PreparedStatement stmt = conn.prepareStatement(sql)) {
+	        stmt.setInt(1, userId);
+	        stmt.setInt(2, year);
+	        stmt.setInt(3, month);
+	        stmt.setInt(4, categoryId);	       
+	        ResultSet rs = stmt.executeQuery();
+	        if (rs.next()) return rs.getDouble(1);
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+	    return Double.MAX_VALUE;
 	}
 
 
     // ✅ Method to get category ID (or insert if not exists)
-    public int getCategoryId(String categoryName) throws SQLException {
-        String checkQuery = "SELECT category_id FROM categories WHERE category_name = ?";
-        try (Connection conn = DBConnection.getConnection();
-        		PreparedStatement checkStmt = conn.prepareStatement(checkQuery)) {
-            checkStmt.setString(1, categoryName);
-            ResultSet rs = checkStmt.executeQuery();
-            if (rs.next()) {
-                return rs.getInt("category_id"); // ✅ Return existing category_id
-            }
-        }
-
-        // If category does not exist, insert it
-        String insertQuery = "INSERT INTO categories (category_name) VALUES (?)";
-        try (Connection conn = DBConnection.getConnection();
-        		PreparedStatement insertStmt = conn.prepareStatement(insertQuery, Statement.RETURN_GENERATED_KEYS)) {
-            insertStmt.setString(1, categoryName);
-            insertStmt.executeUpdate();
-            ResultSet generatedKeys = insertStmt.getGeneratedKeys();
-            if (generatedKeys.next()) {
-                return generatedKeys.getInt(1); // ✅ Return newly created category_id
-            }
-        }
-        throw new SQLException("Failed to insert category: " + categoryName);
-    }
+	public int getCategoryId(String categoryName) throws SQLException {
+	    
+	    System.out.println("[DEBUG] Method getCategoryId called with categoryName: " + categoryName);
+	    
+	    if (categoryName == null || categoryName.trim().isEmpty()) {
+	        System.out.println("[DEBUG] Invalid category name: null or empty");
+	        throw new SQLException("Category name cannot be null or empty");
+	    }
+	    
+	    String checkQuery = "SELECT category_id FROM categories WHERE category_name = ?";
+	    try (Connection conn = DBConnection.getConnection();
+	         PreparedStatement checkStmt = conn.prepareStatement(checkQuery)) {
+	        
+	        System.out.println("[DEBUG] Executing query to check existing category: " + checkQuery);
+	        checkStmt.setString(1, categoryName);
+	        ResultSet rs = checkStmt.executeQuery();
+	        
+	        if (rs.next()) {
+	            int existingCategoryId = rs.getInt("category_id");
+	            System.out.println("[DEBUG] Category found, returning existing category_id: " + existingCategoryId);
+	            return existingCategoryId; // ✅ Return existing category_id
+	        }
+	    }
+	    
+	    // If category does not exist, insert it
+	    String insertQuery = "INSERT INTO categories (category_name) VALUES (?)";
+	    try (Connection conn = DBConnection.getConnection();
+	         PreparedStatement insertStmt = conn.prepareStatement(insertQuery, Statement.RETURN_GENERATED_KEYS)) {
+	        
+	        System.out.println("[DEBUG] Executing insert query: " + insertQuery);
+	        insertStmt.setString(1, categoryName);
+	        int rowsAffected = insertStmt.executeUpdate();
+	        
+	        if (rowsAffected > 0) {
+	            ResultSet generatedKeys = insertStmt.getGeneratedKeys();
+	            if (generatedKeys.next()) {
+	                int newCategoryId = generatedKeys.getInt(1);
+	                System.out.println("[DEBUG] Category inserted, returning new category_id: " + newCategoryId);
+	                return newCategoryId; // ✅ Return newly created category_id
+	            }
+	        }
+	    }
+	    
+	    System.out.println("[DEBUG] Failed to insert category: " + categoryName);
+	    throw new SQLException("Failed to insert category: " + categoryName);
+	}
 
     // ✅ Add expense and also insert into transactions table
     public void addExpense(Expense expense) {
-        String expenseSQL = "INSERT INTO expenses (user_id, date, category_id, amount, description, month) VALUES (?, ?, ?, ?, ?, ?)";
-        String transactionSQL = "INSERT INTO transactions (user_id, expense_id, transaction_type, amount, date) VALUES (?, ?, ?, ?, ?)";
+        String expenseSQL = "INSERT INTO expenses (user_id, date, category_id, amount, description, month, year) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String transactionSQL = "INSERT INTO transactions (user_id, expense_id, transaction_type, amount, date, month, year) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection()) {
             conn.setAutoCommit(false); // ✅ Start transaction
 
-            int categoryId = getCategoryId(expense.getCategory()); // Get or insert category
-            int expenseId = -1;
+            int expenseId =-1;
             
             LocalDate expenseDate = LocalDate.parse(expense.getDate(), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
             int month1 = expenseDate.getMonthValue();
@@ -108,10 +141,11 @@ public class ExpenseDAO {
             try (PreparedStatement expenseStmt = conn.prepareStatement(expenseSQL, Statement.RETURN_GENERATED_KEYS)) {
                 expenseStmt.setInt(1, expense.getUserId());
                 expenseStmt.setString(2, expense.getDate());
-                expenseStmt.setInt(3, categoryId);
+                expenseStmt.setInt(3, expense.getCategoryId());
                 expenseStmt.setDouble(4, expense.getAmount());
                 expenseStmt.setString(5, expense.getDescription());
-                expenseStmt.setInt(6, month1);
+                expenseStmt.setInt(6, expense.getMonth());
+                expenseStmt.setInt(7, expense.getYear());
                 expenseStmt.executeUpdate();
 
                 ResultSet rs = expenseStmt.getGeneratedKeys();
@@ -128,6 +162,8 @@ public class ExpenseDAO {
                     transactionStmt.setString(3, "EXPENSE"); // ✅ Transaction type
                     transactionStmt.setDouble(4, expense.getAmount());
                     transactionStmt.setString(5, expense.getDate());
+                    transactionStmt.setInt(6, expense.getMonth());
+                    transactionStmt.setInt(7, expense.getYear());
                     transactionStmt.executeUpdate();
                 }
             }
