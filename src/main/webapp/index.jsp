@@ -23,7 +23,7 @@
     </form>
     <div class="signup">
       <b>Don't have account?</b>
-      <a href="./register.jsp">Sign up</a>
+      <a href="register">Sign up</a>
     </div>
     <b class="msgtext" style="color: red;">Message</b>
   </div>
